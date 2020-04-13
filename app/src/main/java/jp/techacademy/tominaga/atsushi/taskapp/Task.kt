@@ -10,7 +10,8 @@ import java.util.Date
 open class Task: RealmObject(), Serializable {
     var title: String = ""  //タイトル
     var contents: String = "" //内容
-    var date: Date = Date()  //日付
+    var category: String = "" //カテゴリー
+    var date: Date = Date() //日付
 
     //id をプライマリーキーとして設定
     @PrimaryKey
