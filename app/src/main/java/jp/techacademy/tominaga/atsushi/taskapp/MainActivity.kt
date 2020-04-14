@@ -1,5 +1,6 @@
 package jp.techacademy.tominaga.atsushi.taskapp
 
+import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
@@ -72,6 +73,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 results.deleteAllFromRealm()
                 mRealm.commitTransaction()
 
+                val resultIntent = Intent(applicationContext,TaskAlarmReceiver::class.java)
+                val resultPendingIntent = PendingIntent.getBroadcast(
+                    this@MainActivity,
+                    task.id,
+                    resultIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+
                 reloadListView()
             }
 
@@ -83,7 +92,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             true
         }
 
+
         categorySearchButton.setOnClickListener(this)
+        allViewButton.setOnClickListener(this)
 
 
 
@@ -114,19 +125,59 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onClick(v: View?) {
+
         val categoryString = categoryEditText.text.toString()
 
-        //Realmデータベースから、「すべてのデータを取得して新しい日時順に並べた結果」を取得
-        val taskRealmResults = mRealm.where(Task::class.java).equalTo("category",categoryString).findAll().sort("date",Sort.DESCENDING)
+        when(v) {
+            categorySearchButton ->{
+                if (categoryString != "") {
+                    //Realmデータベースから、「すべてのデータを取得して新しい日時順に並べた結果」を取得
 
-        //上記の結果を、TaskList としてセットする
-        mTaskAdapter.taskList = mRealm.copyFromRealm(taskRealmResults)
+                    val taskRealmResults =
+                        mRealm.where(Task::class.java).equalTo("category", categoryString).findAll()
+                            .sort("date", Sort.DESCENDING)
 
-        //TaskのListView用のアダプタに渡す
-        listView1.adapter = mTaskAdapter
+                    //上記の結果を、TaskList としてセットする
+                    mTaskAdapter.taskList = mRealm.copyFromRealm(taskRealmResults)
 
-        //表示を更新するために、アダプターにデータが変更されたことを知らせる
-        mTaskAdapter.notifyDataSetChanged()
+                    //TaskのListView用のアダプタに渡す
+                    listView1.adapter = mTaskAdapter
+
+                    //表示を更新するために、アダプターにデータが変更されたことを知らせる
+                    mTaskAdapter.notifyDataSetChanged()
+
+                } else {
+                    val taskRealmResults =
+                        mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
+
+                    //上記の結果を、TaskList としてセットする
+                    mTaskAdapter.taskList = mRealm.copyFromRealm(taskRealmResults)
+
+                    //TaskのListView用のアダプタに渡す
+                    listView1.adapter = mTaskAdapter
+
+                    //表示を更新するために、アダプターにデータが変更されたことを知らせる
+                    mTaskAdapter.notifyDataSetChanged()
+                }
+            }
+            allViewButton ->{
+                val taskRealmResults =
+                    mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
+
+                //上記の結果を、TaskList としてセットする
+                mTaskAdapter.taskList = mRealm.copyFromRealm(taskRealmResults)
+
+                //TaskのListView用のアダプタに渡す
+                listView1.adapter = mTaskAdapter
+
+                //表示を更新するために、アダプターにデータが変更されたことを知らせる
+                mTaskAdapter.notifyDataSetChanged()
+            }
+
+
+        }
+
+
     }
 
 }
